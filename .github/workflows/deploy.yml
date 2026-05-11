@@ -38,17 +38,23 @@ jobs:
             > ~/.snowflake/config.toml
           chmod 600 ~/.snowflake/config.toml
 
-      - name: Upload app file to Snowflake stage
+      - name: Create stage and Streamlit app (if not exist), then upload
         run: |
           DASHBOARD="${{ github.event.inputs.dashboard }}"
+
+          # 1. Create stage if not exists
+          snow sql --connection default -q "
+            CREATE STAGE IF NOT EXISTS TEST.PUBLIC.\"${DASHBOARD}\";"
+
+          # 2. Upload app.py to stage
           snow stage copy "dashboards/${DASHBOARD}/app.py" \
-            "@TEST.PUBLIC.${DASHBOARD}/" \
+            "@TEST.PUBLIC.\"${DASHBOARD}\"/" \
             --connection default \
             --overwrite
 
-      - name: Update Streamlit app via SQL
-        run: |
-          DASHBOARD="${{ github.event.inputs.dashboard }}"
-          snow sql \
-            --connection default \
-            -q "ALTER STREAMLIT TEST.PUBLIC.\"${DASHBOARD}\" SET MAIN_FILE='app.py';"
+          # 3. Create or replace the Streamlit app pointing to that stage
+          snow sql --connection default -q "
+            CREATE OR REPLACE STREAMLIT TEST.PUBLIC.\"${DASHBOARD}\"
+              ROOT_LOCATION = '@TEST.PUBLIC.\"${DASHBOARD}\"'
+              MAIN_FILE = 'app.py'
+              QUERY_WAREHOUSE = COMPUTE_WH;"
