@@ -1,12 +1,27 @@
 definition_version: "2"
 
+# Add new dashboards as new entities below.
+# Each entity maps to one Streamlit app in TEST.PUBLIC.
+# Files live in dashboards/<name>/app.py
+
 entities:
   streamlit_test:
     type: streamlit
     identifier:
-      name: '"streamlit_test"'
+      name: streamlit_test
       schema: PUBLIC
       database: TEST
-    main_file: streamlit_app.py
+    main_file: dashboards/streamlit_test/app.py
     query_warehouse: COMPUTE_WH
-    stage: streamlit_stage
+    stage: streamlit_test
+
+  # Example: second dashboard (uncomment and create dashboards/sales_dashboard/app.py)
+  # sales_dashboard:
+  #   type: streamlit
+  #   identifier:
+  #     name: sales_dashboard
+  #     schema: PUBLIC
+  #     database: TEST
+  #   main_file: dashboards/sales_dashboard/app.py
+  #   query_warehouse: COMPUTE_WH
+  #   stage: sales_dashboard

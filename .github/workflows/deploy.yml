@@ -1,11 +1,20 @@
 name: Deploy Streamlit to Snowflake
 
 on:
-  workflow_dispatch:  # Manual trigger only — run from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      dashboard:
+        description: 'Which dashboard to deploy'
+        required: true
+        default: 'streamlit_test'
+        type: choice
+        options:
+          - streamlit_test
+          # Add more dashboards here as new options
 
 jobs:
   deploy:
-    name: Deploy to Snowflake (streamlit_test)
+    name: Deploy "${{ github.event.inputs.dashboard }}"
     runs-on: ubuntu-latest
 
     steps:
@@ -15,7 +24,7 @@ jobs:
       - name: Install Snowflake CLI
         run: pip install snowflake-cli
 
-      - name: Upload streamlit_app.py to stage
+      - name: Configure Snowflake connection
         env:
           SNOWFLAKE_ACCOUNT:   ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER:      ${{ secrets.SNOWFLAKE_USER }}
@@ -28,6 +37,18 @@ jobs:
             "$SNOWFLAKE_ACCOUNT" "$SNOWFLAKE_USER" "$SNOWFLAKE_PASSWORD" "$SNOWFLAKE_ROLE" "$SNOWFLAKE_WAREHOUSE" \
             > ~/.snowflake/config.toml
           chmod 600 ~/.snowflake/config.toml
-          snow stage copy streamlit_app.py @TEST.PUBLIC.streamlit_test/default_checkout/ \
+
+      - name: Upload app file to Snowflake stage
+        run: |
+          DASHBOARD="${{ github.event.inputs.dashboard }}"
+          snow stage copy "dashboards/${DASHBOARD}/app.py" \
+            "@TEST.PUBLIC.${DASHBOARD}/" \
             --connection default \
             --overwrite
+
+      - name: Update Streamlit app via SQL
+        run: |
+          DASHBOARD="${{ github.event.inputs.dashboard }}"
+          snow sql \
+            --connection default \
+            -q "ALTER STREAMLIT TEST.PUBLIC.\"${DASHBOARD}\" SET MAIN_FILE='app.py';"
