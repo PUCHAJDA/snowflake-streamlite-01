@@ -6,7 +6,7 @@ from snowflake.snowpark.context import get_active_session
 session = get_active_session()
 
 # ── Page config ──────────────────────────────────────────────
-st.set_page_config(page_title="Pfizer Analytics Dashboard", layout="wide")
+st.set_page_config(page_title="Pfizer Analytics Dashboard Test", layout="wide")
 st.title("Pfizer Analytics Dashboard")
 
 # ── Sidebar filters ───────────────────────────────────────────
