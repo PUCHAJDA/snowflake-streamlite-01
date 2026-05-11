@@ -4,7 +4,7 @@ entities:
   streamlit_test:
     type: streamlit
     identifier:
-      name: streamlit_test
+      name: '"streamlit_test"'
       schema: PUBLIC
       database: TEST
     main_file: streamlit_app.py
