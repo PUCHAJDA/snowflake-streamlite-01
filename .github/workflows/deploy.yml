@@ -1,13 +1,7 @@
 name: Deploy Streamlit to Snowflake
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'streamlit_app.py'
-      - 'snowflake.yml'
-  workflow_dispatch:  # Allow manual trigger from GitHub UI
+  workflow_dispatch:  # Manual trigger only — run from GitHub Actions UI
 
 jobs:
   deploy:
