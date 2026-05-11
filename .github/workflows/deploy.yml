@@ -41,20 +41,21 @@ jobs:
       - name: Create stage and Streamlit app (if not exist), then upload
         run: |
           DASHBOARD="${{ github.event.inputs.dashboard }}"
+          STAGE="${DASHBOARD}_stage"
 
-          # 1. Create stage if not exists
-          snow sql --connection default -q "
-            CREATE STAGE IF NOT EXISTS TEST.PUBLIC.\"${DASHBOARD}\";"
+          # 1. Create stage (uppercase is fine - just internal storage)
+          snow sql --connection default -q \
+            "CREATE STAGE IF NOT EXISTS TEST.PUBLIC.${STAGE};"
 
-          # 2. Upload app.py to stage
+          # 2. Upload app.py (reference stage without quotes - matches uppercase)
           snow stage copy "dashboards/${DASHBOARD}/app.py" \
-            "@TEST.PUBLIC.\"${DASHBOARD}\"/" \
+            "@TEST.PUBLIC.${STAGE}/" \
             --connection default \
             --overwrite
 
-          # 3. Create or replace the Streamlit app pointing to that stage
-          snow sql --connection default -q "
-            CREATE OR REPLACE STREAMLIT TEST.PUBLIC.\"${DASHBOARD}\"
-              ROOT_LOCATION = '@TEST.PUBLIC.\"${DASHBOARD}\"'
-              MAIN_FILE = 'app.py'
-              QUERY_WAREHOUSE = COMPUTE_WH;"
+          # 3. Create/replace Streamlit app with quoted lowercase name
+          snow sql --connection default -q \
+            "CREATE OR REPLACE STREAMLIT TEST.PUBLIC.\"${DASHBOARD}\"
+               ROOT_LOCATION = '@TEST.PUBLIC.${STAGE}'
+               MAIN_FILE = 'app.py'
+               QUERY_WAREHOUSE = COMPUTE_WH;"
