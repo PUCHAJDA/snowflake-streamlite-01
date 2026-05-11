@@ -7,7 +7,7 @@ session = get_active_session()
 
 # ── Page config ──────────────────────────────────────────────
 st.set_page_config(page_title="Pfizer Analytics Dashboard Test", layout="wide")
-st.title("Pfizer Analytics Dashboard")
+st.title("Pfizer Analytics Dashboard Test")
 
 # ── Sidebar filters ───────────────────────────────────────────
 st.sidebar.header("Filters")
