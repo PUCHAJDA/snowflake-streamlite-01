@@ -1,0 +1,13 @@
+definition_version: "2"
+
+entities:
+  streamlit_test:
+    type: streamlit
+    identifier:
+      name: streamlit_test
+      schema: PUBLIC
+      database: TEST
+    title: "Pfizer Analytics Dashboard"
+    main_file: streamlit_app.py
+    query_warehouse: COMPUTE_WH
+    stage: streamlit_stage

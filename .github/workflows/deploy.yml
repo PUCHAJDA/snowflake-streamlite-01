@@ -1,0 +1,38 @@
+name: Deploy Streamlit to Snowflake
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'streamlit_app.py'
+      - 'snowflake.yml'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    name: Deploy to Snowflake (streamlit_test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Snowflake CLI
+        uses: snowflakedb/snowflake-cli-action@v1
+        with:
+          cli-version: "latest"
+
+      - name: Deploy Streamlit app
+        env:
+          SNOWFLAKE_CONNECTIONS_DEFAULT_ACCOUNT:   ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_CONNECTIONS_DEFAULT_USER:      ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_CONNECTIONS_DEFAULT_PASSWORD:  ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_CONNECTIONS_DEFAULT_ROLE:      ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_CONNECTIONS_DEFAULT_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_CONNECTIONS_DEFAULT_DATABASE:  TEST
+          SNOWFLAKE_CONNECTIONS_DEFAULT_SCHEMA:    PUBLIC
+        run: |
+          snow streamlit deploy \
+            --connection default \
+            --replace
