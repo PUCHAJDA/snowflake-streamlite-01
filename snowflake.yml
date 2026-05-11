@@ -7,7 +7,6 @@ entities:
       name: streamlit_test
       schema: PUBLIC
       database: TEST
-    title: "Pfizer Analytics Dashboard Test"
     main_file: streamlit_app.py
     query_warehouse: COMPUTE_WH
     stage: streamlit_stage
