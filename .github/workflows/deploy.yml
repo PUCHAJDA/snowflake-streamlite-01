@@ -15,23 +15,20 @@ jobs:
       - name: Install Snowflake CLI
         run: pip install snowflake-cli
 
-      - name: Configure Snowflake CLI connection
+      - name: Deploy Streamlit app
+        env:
+          SNOWFLAKE_ACCOUNT:   ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER:      ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD:  ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ROLE:      ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE:  TEST
+          SNOWFLAKE_SCHEMA:    PUBLIC
         run: |
           mkdir -p ~/.snowflake
-          cat > ~/.snowflake/config.toml << EOF
-          [connections.default]
-          account   = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
-          user      = "${{ secrets.SNOWFLAKE_USER }}"
-          password  = "${{ secrets.SNOWFLAKE_PASSWORD }}"
-          role      = "${{ secrets.SNOWFLAKE_ROLE }}"
-          warehouse = "${{ secrets.SNOWFLAKE_WAREHOUSE }}"
-          database  = "TEST"
-          schema    = "PUBLIC"
-          EOF
+          printf '[connections.default]\naccount="%s"\nuser="%s"\npassword="%s"\nrole="%s"\nwarehouse="%s"\ndatabase="TEST"\nschema="PUBLIC"\n' \
+            "$SNOWFLAKE_ACCOUNT" "$SNOWFLAKE_USER" "$SNOWFLAKE_PASSWORD" "$SNOWFLAKE_ROLE" "$SNOWFLAKE_WAREHOUSE" \
+            > ~/.snowflake/config.toml
           chmod 600 ~/.snowflake/config.toml
-
-      - name: Deploy Streamlit app
-        run: |
-          snow streamlit deploy \
-            --connection default \
-            --replace
+          cat ~/.snowflake/config.toml
+          snow streamlit deploy --connection default --replace
